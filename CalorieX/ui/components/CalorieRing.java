@@ -38,13 +38,13 @@ public class CalorieRing extends JPanel {
             ? Math.min(caloriesConsumedToday / dailyCalorieGoal, 1.0) : 0;
         int sweepAngleDegrees = (int) (360 * progressPercent);
 
-        // Background track ring
+        //Background track ring
         g2.setStroke(new BasicStroke(strokeWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         g2.setColor(Color.GRAY);
         g2.drawOval(ringOriginX + strokeWidth / 2, ringOriginY + strokeWidth / 2,
                     ringDiameter - strokeWidth, ringDiameter - strokeWidth);
 
-        // Filled progress arc
+        //Filled progress arc
         g2.setColor(isOverGoal ? Color.LIGHT_GRAY : Color.WHITE);
         g2.drawArc(ringOriginX + strokeWidth / 2, ringOriginY + strokeWidth / 2,
                    ringDiameter - strokeWidth, ringDiameter - strokeWidth,

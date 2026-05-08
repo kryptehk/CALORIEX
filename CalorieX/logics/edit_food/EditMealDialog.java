@@ -61,7 +61,7 @@ public class EditMealDialog extends JDialog {
         foodRowsPanel.removeAll();
 
         java.util.List<Food> loggedFoods = FoodController.getMealsForDate(dateString)
-                                                          .getOrDefault(mealName, List.of());
+                                            .getOrDefault(mealName, List.of());
 
         if (loggedFoods.isEmpty()) {
             JLabel emptyStateLabel = new JLabel("No foods logged in this meal yet.");

@@ -12,7 +12,7 @@ public class DarkButton extends JButton {
         super(buttonLabel);
         setBackground(normalBackground);
         setForeground(Color.BLACK);
-        setFont(Theme.bold(13));
+        setFont(new Font("Arial", Font.BOLD, 13));
         setFocusPainted(false);
         setBorderPainted(false);
         setOpaque(true);

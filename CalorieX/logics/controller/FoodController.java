@@ -26,7 +26,8 @@ public class FoodController {
       Adds a new food to the reusable library and persists the updated library to disk.
       @param foodToAdd the food item to add
       add food object to food library then save to disk
-     */
+      called in ManualEntryDialog
+          */
     public static void addFoodToLibrary(Food foodToAdd) {
         foodLibrary.add(foodToAdd);
         saveToDisk();
@@ -35,16 +36,27 @@ public class FoodController {
     /**
       Returns an unmodifiable view of the full food library.
       @return the list of all food items
+      used in screens/FoodLibraryPanel, SearchFoodIalog 
+
      */
     public static List<Food> getFoodLibrary() {
         return Collections.unmodifiableList(foodLibrary);
     }
 
     // Removes the food at the given library index and persists.
+    //FoodLibraryPanel
     public static void removeFoodFromLibrary(int libraryIndex) {
         if (libraryIndex >= 0 && libraryIndex < foodLibrary.size()) {
             foodLibrary.remove(libraryIndex); //goes to ram
             saveToDisk(); 
+        }
+    }
+
+    /*FoodLibrary*/    
+    public static void updateFoodInLibrary(int libraryIndex, Food updatedFood) {
+        if (libraryIndex >= 0 && libraryIndex < foodLibrary.size()) { //bounds checker
+            foodLibrary.set(libraryIndex, updatedFood);
+            saveToDisk();
         }
     }
 
@@ -56,7 +68,7 @@ public class FoodController {
      @param foodToLog   the food item to record
      computeIfAbasent = shorcut for "Check if this key exists; if it does, return the value.
      "If this key is missing, run this function to create it; then, return the value (existing or new) so I can use it."
-
+        used in ManualEntry,SearchFood dialogs
      */
     public static void logFoodForMeal(String dateString, String mealName, Food foodToLog) {
         dailyMealLog
@@ -72,6 +84,7 @@ public class FoodController {
       @param dateString  ISO date string
       @param mealName    meal slot name
       @param foodIndex   zero-based position of the food to remove
+      ManualEntry and Dashboard
      */
     public static void removeFoodFromLog(String dateString, String mealName, int foodIndex) {
         Map<String, List<Food>> mealsOnDate = dailyMealLog.get(dateString);
@@ -96,6 +109,7 @@ public class FoodController {
       @param mealName      meal slot name
       @param foodIndex     zero-based position to replace
       @param updatedFood   the new food to put in that position
+      ManualEntry
      */
     public static void updateFoodInLog(String dateString, String mealName,
                                        int foodIndex, Food updatedFood) {
@@ -124,13 +138,17 @@ public class FoodController {
 
     //  
 
-    // Serialisation wrapper that bundles both the library and the daily log together.
+    /* save file architectuer
+    Serialisation wrapper that bundles both the library and the daily log together.
+    persited data acts as a shipping crate
+    */
     private static class PersistedData implements Serializable {
-        private static final long serialVersionUID = 2L;
-        List<Food> library;
-        Map<String, Map<String, List<Food>>> dailyLog;
+        private static final long serialVersionUID = 2L; //unique id blabla
+        List<Food> library; //masterlist of all foods
+        Map<String, Map<String, List<Food>>> dailyLog; //date -> meal ->list
     }
 
+    
     @SuppressWarnings("unchecked")
     private static void loadFromDisk() {
         File dataFile = new File(FOOD_LOG_FILE_PATH);
@@ -145,7 +163,6 @@ public class FoodController {
                 foodLibrary  = savedData.library  != null ? savedData.library  : new ArrayList<>();
                 dailyMealLog = savedData.dailyLog != null ? savedData.dailyLog : new HashMap<>();
             } else {
-                // Legacy format: file only contained the daily log map (no library)
                 dailyMealLog = (Map<String, Map<String, List<Food>>>) rawData;
                 foodLibrary  = new ArrayList<>();
             }

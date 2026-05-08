@@ -64,27 +64,32 @@ public class UserProfile implements Serializable {
          this.activityLevel = activityLevel; }
 
     //Calculations 
-    /* Basal Metabolic Rate using the Mifflin-St Jeor formula. 
-       this is used  */
+    /* #1
+    Basal Metabolic Rate using the Mifflin-St Jeor formula. 
+    BMR represents the number of calories your body burns at rest  */
+
     public double calculateBMR() {
         double baseBMR = (10.0 * weightKilograms) + (6.25 * heightCentimeters) - (5.0 * ageYears);
-        return "Male".equals(biologicalGender) ? baseBMR + 5 : baseBMR - 161;       //adjust by gender
+        return "Male".equals(biologicalGender) ? baseBMR + 5 : baseBMR - 161; //ternary operator shorcut for if else statement
+        // adjust by gender
     }
 
-    /* Total Daily Energy Expenditure = BMR multiplied by the activity level factor. */
+    /* #2 Total Daily Energy Expenditure = BMR multiplied by the activity level factor. 
+        or total calories your body burns in a day base on how active you're.
+    */
     public double calculateTDEE() {
         double bmr = calculateBMR();
-        //switch expression used in 
+        //switch expression 
         return switch (activityLevel) {
-        case "Lightly Active | 1-2x / week"      -> bmr * 1.375;
-        case "Moderately Active | 3-5x / week"   -> bmr * 1.55;
-        case "Very Active | 6-7x / week"         -> bmr * 1.725;
-        case "Extra Active | Athlete / 2x daily" -> bmr * 1.9;
-        default                                  -> bmr * 1.2;
+                case "Lightly Active | 1-2x / week"      -> bmr * 1.375;
+                case "Moderately Active | 3-5x / week"   -> bmr * 1.55;
+                case "Very Active | 6-7x / week"         -> bmr * 1.725;
+                case "Extra Active | Athlete / 2x daily" -> bmr * 1.9;
+                default                                  -> bmr * 1.2;
         };
     }
 
-    /* Daily calorie target adjusted up or down based on the user's fitness goal. */
+    /* #3 Daily calorie target adjusted up or down based on the user's fitness goal. */
     public double getDailyCalorieTarget() {
         double tdee = calculateTDEE();
         return switch (fitnessGoal) {

@@ -8,7 +8,6 @@ import logics.model.UserProfile;
 import logics.user_info.UserDataBase;
 import logics.validator.Validator;
 import ui.components.*;
-import ui.screens.*;
 
 /**
  The first screen the user sees on app launch.
@@ -20,7 +19,7 @@ import ui.screens.*;
 public class LoginFrame {
 
     
-    //App title label with a subtle white glow effect 
+    //App title label pixel 
     private class AppTitleLabel extends JLabel {
         AppTitleLabel(String labelText, Font labelFont) {
             super(labelText);
@@ -60,12 +59,11 @@ public class LoginFrame {
         setupFrame.setLocationRelativeTo(null);
         setupFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        //I remove the BlackBackgroundpanel class
         JPanel rootPanel = new JPanel();
         rootPanel.setBackground(Color.BLACK);
         rootPanel.setLayout(new BorderLayout());
         rootPanel.setBorder(new EmptyBorder(40, 60, 40, 60));
-        rootPanel.add(buildHeadingPanel(),       BorderLayout.NORTH);
+        rootPanel.add(buildHeadingPanel(),  BorderLayout.NORTH);
         rootPanel.add(buildFormCard(setupFrame), BorderLayout.CENTER);
 
         setupFrame.add(rootPanel);
@@ -180,6 +178,7 @@ public class LoginFrame {
         getStartedButton.setFont(new Font("Satoshi", Font.BOLD, 22));
         formCard.add(getStartedButton, layoutConstraints);  
 
+        //Validator
         getStartedButton.addActionListener(e -> {
             String validationError = Validator.validateProfileForm(
                 nameInputField.getText(),
@@ -202,7 +201,7 @@ public class LoginFrame {
             String selectedActivityLevel = (String) activityDropdown.getSelectedItem();
             String selectedGoal= (String) goalDropdown.getSelectedItem();
 
-            // final packer
+            
             UserProfile newProfile = new UserProfile(
                 userName, ageYears, heightCm, weightKg,
                 selectedGoal, selectedSex, selectedActivityLevel);

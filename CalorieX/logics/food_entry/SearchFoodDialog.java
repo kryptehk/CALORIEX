@@ -5,24 +5,29 @@ import logics.model.Food;
 
 import javax.swing.*;
 import javax.swing.border.*;
-import javax.swing.event.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.List;
 import java.util.function.*;
-import java.util.stream.*;
 
 /**
  * Dialog for searching the food library and logging a selected item to a meal.
- * The list filters in real time as the user types in the search field.
+
  */
 public class SearchFoodDialog extends JDialog {
-
+    //holds the list of foods
     private final DefaultListModel<Food> foodListModel = new DefaultListModel<>();
-    private final JList<Food>            foodResultsList = new JList<>(foodListModel);
+    //displays the data
+    private final JList<Food>foodResultsList = new JList<>(foodListModel);
 
-    public SearchFoodDialog(JFrame parentFrame, String mealName, String dateString,
-                            Consumer<Food> onFoodAdded) {
+    /**
+       @param parentFrame - where the dialog is attached to
+       @param mealName - Breakfast etc.
+       @param dateString - which day
+       @param onFoodAdded -callback function after adding food
+       consumer<> lets the ui update this dialog like refresh dashboard
+    */
+
+    public SearchFoodDialog(JFrame parentFrame, String mealName, String dateString, Consumer<Food> onFoodAdded) {
         super(parentFrame, "Search Food Library — " + mealName, true);
         setSize(480, 420);
         setLocationRelativeTo(parentFrame);
@@ -31,17 +36,7 @@ public class SearchFoodDialog extends JDialog {
         rootPanel.setBackground(Color.BLACK);
         rootPanel.setBorder(new EmptyBorder(20, 24, 20, 24));
 
-        JTextField searchInputField = new JTextField();
-        searchInputField.setBackground(Color.BLACK);
-        searchInputField.setForeground(Color.WHITE);
-        searchInputField.setCaretColor(Color.WHITE);
-        searchInputField.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        searchInputField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.WHITE),
-            BorderFactory.createEmptyBorder(6, 10, 6, 10)
-        ));
-        searchInputField.setToolTipText("Type to search food library...");
-
+      
         foodResultsList.setBackground(new Color(20, 20, 20));
         foodResultsList.setForeground(Color.WHITE);
         foodResultsList.setFont(new Font("SansSerif", Font.PLAIN, 13));
@@ -66,25 +61,7 @@ public class SearchFoodDialog extends JDialog {
 
         showAllLibraryResults();
 
-        searchInputField.getDocument().addDocumentListener(new DocumentListener() {
-            public void insertUpdate(DocumentEvent e)  { filterResultsByQuery(); }
-            public void removeUpdate(DocumentEvent e)  { filterResultsByQuery(); }
-            public void changedUpdate(DocumentEvent e) { filterResultsByQuery(); }
-
-            private void filterResultsByQuery() {
-                String searchQuery = searchInputField.getText().trim().toLowerCase();
-                if (searchQuery.isEmpty()) {
-                    showAllLibraryResults();
-                } else {
-                    List<Food> matchingFoods = FoodController.getFoodLibrary().stream()
-                        .filter(food -> food.getName().toLowerCase().contains(searchQuery))
-                        .collect(Collectors.toList());
-                    foodListModel.clear();
-                    matchingFoods.forEach(foodListModel::addElement);
-                }
-            }
-        });
-
+       
         logSelectedFoodButton.addActionListener(e -> {
             Food selectedFood = foodResultsList.getSelectedValue();
             if (selectedFood == null) {
@@ -103,7 +80,6 @@ public class SearchFoodDialog extends JDialog {
             }
         });
 
-        rootPanel.add(searchInputField,      BorderLayout.NORTH);
         rootPanel.add(resultsScrollPane,     BorderLayout.CENTER);
         rootPanel.add(logSelectedFoodButton, BorderLayout.SOUTH);
         setContentPane(rootPanel);
@@ -114,23 +90,31 @@ public class SearchFoodDialog extends JDialog {
         FoodController.getFoodLibrary().forEach(foodListModel::addElement);
     }
 
-    // ── Cell renderer showing name + macro summary ────────────────────────────
+  // Cell renderer showing name + macro summary 
+private static class FoodLibraryListCellRenderer extends DefaultListCellRenderer {
+    public Component getListCellRendererComponent(JList<?> list, Object cellValue,
+            int rowIndex, boolean isSelected, boolean cellHasFocus) {
 
-    private static class FoodLibraryListCellRenderer extends DefaultListCellRenderer {
-        public Component getListCellRendererComponent(JList<?> list, Object cellValue,
-                int rowIndex, boolean isSelected, boolean cellHasFocus) {
-            super.getListCellRendererComponent(list, cellValue, rowIndex, isSelected, cellHasFocus);
-            if (cellValue instanceof Food) {
-                Food foodItem = (Food) cellValue;
-                setText(String.format(
-                    "<html><b>%s</b>&nbsp;<span style='color:#aaa'>%d kcal&nbsp;P:%.0fg&nbsp;C:%.0fg&nbsp;F:%.0fg</span></html>",
-                    foodItem.getName(), foodItem.getCalories(),
-                    foodItem.getProtein(), foodItem.getCarbs(), foodItem.getFat()));
-            }
-            setBackground(isSelected ? Color.DARK_GRAY : new Color(20, 20, 20));
-            setForeground(Color.WHITE);
-            setBorder(new EmptyBorder(6, 10, 6, 10));
-            return this;
+        super.getListCellRendererComponent(list, cellValue, rowIndex, isSelected, cellHasFocus);
+
+        if (cellValue instanceof Food) { // check if the list is actually food object
+            Food foodItem = (Food) cellValue;
+
+            // simple readable format
+            setText(
+                foodItem.getName() + " - " +
+                foodItem.getCalories() + " kcal " +
+                "P:" + (int)foodItem.getProtein() + "g " +
+                "C:" + (int)foodItem.getCarbs() + "g " +
+                "F:" + (int)foodItem.getFat() + "g"
+            );
         }
+
+        setBackground(isSelected ? Color.DARK_GRAY : new Color(20, 20, 20));
+        setForeground(Color.WHITE);
+        setBorder(new EmptyBorder(6, 10, 6, 10));
+
+        return this;
+    }
     }
 }

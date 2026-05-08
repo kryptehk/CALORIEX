@@ -43,7 +43,7 @@ public class AddFoodDialog extends JDialog {
 
         JButton searchLibraryButton = buildStyledButton("Search Library");
         JButton enterManuallyButton = buildStyledButton("Enter Manually");
-
+        //dispose is clean up current dialog 
         searchLibraryButton.addActionListener(e -> {
             dispose();
             new SearchFoodDialog(parentFrame, mealName, dateString, onFoodAdded).setVisible(true);

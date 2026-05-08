@@ -34,8 +34,10 @@ public class DashboardPanel {
     private double totalCaloriesToday, totalProteinToday, totalCarbsToday,
                    totalFatToday, totalFibreToday, totalSodiumToday, totalSugarToday;
 
+    //Inner class: to tell other programmers that these are used for dashboard only
     private StatsSection statsSection;
     private MealSection mealSection;
+
     private JLabel currentDateLabel;
     private JFrame parentFrame;
 
@@ -43,22 +45,36 @@ public class DashboardPanel {
         this.userProfile = userProfile;
     }
 
+    //use to assemble
     public JPanel build() {
+        /*
+        creates two section
+         */
         statsSection = new StatsSection(this);
         mealSection  = new MealSection(this);
 
         JPanel rootPanel = new JPanel(new BorderLayout());
         rootPanel.setBackground(Color.BLACK);
+        /*
+        Panel for "Daily Tracker" and "date string"
+         */
         rootPanel.add(buildTopBar(), BorderLayout.NORTH);
 
         JPanel centerPanel = new JPanel(new BorderLayout(0, 16));
         centerPanel.setBackground(Color.BLACK);
-        centerPanel.setBorder(new EmptyBorder(16, 24, 8, 24));
+        /*this is is just padding so the text doesn't touch the edge */
+        centerPanel.setBorder(new EmptyBorder(16, 24, 8, 24)); 
+        /*calorie ring and other macro */
         centerPanel.add(statsSection.build(), BorderLayout.NORTH);
+        /*Breakfast/dinner etc. */
         centerPanel.add(mealSection.build(),  BorderLayout.CENTER);
+
         rootPanel.add(centerPanel, BorderLayout.CENTER);
 
-        // Capture the parent frame reference once the component is added to a window
+        /*
+        when this method runs, you are creating The "Paper"(JPanel), but it's not in a folder yet(JFrame)
+        AncestorListener waits for the jpanel to be added to a window
+        */
         rootPanel.addAncestorListener(new AncestorListener() {
             @Override
             public void ancestorAdded(AncestorEvent e) {
@@ -89,7 +105,7 @@ public class DashboardPanel {
         return topBar;
     }
 
-    // Switches the dashboard to show data for a different date.
+    // used in mainframe
     public void loadDate(String newDateString) {
         viewingDateString = newDateString;
         currentDateLabel.setText(newDateString);
@@ -104,15 +120,21 @@ public class DashboardPanel {
         statsSection.refresh();
     }
 
-    // Nutrition total helpers
+    //initialize values
+    void clearDailyTotals() {
+        totalCaloriesToday = totalProteinToday = totalCarbsToday =
+        totalFatToday = totalFibreToday = totalSodiumToday = totalSugarToday = 0;
+    }
 
     private void recalcDailyTotals() {
-        clearDailyTotals();
+        
+        clearDailyTotals(); 
         FoodController.getMealsForDate(viewingDateString)
             .values()
             .forEach(foodList -> foodList.forEach(this::addFoodToTotals));
     }
-
+    
+    //FOOD object
     void addFoodToTotals(Food loggedFood) {
         totalCaloriesToday += loggedFood.getCalories();
         totalProteinToday  += loggedFood.getProtein();
@@ -133,12 +155,9 @@ public class DashboardPanel {
         totalSugarToday    -= removedFood.getSugar();
     }
 
-    void clearDailyTotals() {
-        totalCaloriesToday = totalProteinToday = totalCarbsToday =
-        totalFatToday = totalFibreToday = totalSodiumToday = totalSugarToday = 0;
-    }
+    
 
-    // Package-private getters (used by inner classes)
+    // Getters
     double getTotalCalories() { return totalCaloriesToday; }
     double getTotalProtein()  { return totalProteinToday; }
     double getTotalCarbs()    { return totalCarbsToday; }
@@ -166,16 +185,17 @@ public class DashboardPanel {
 
         StatsSection(DashboardPanel dashboard) { this.dashboard = dashboard; }
 
-        JPanel build() {
+        /*The method creates one large container (statsRow) and splits it into two distinct zones using borderlayout */
+        JPanel build() { //
             JPanel statsRow = new JPanel(new BorderLayout(24, 0));
             statsRow.setBackground(Color.BLACK);
             statsRow.setPreferredSize(new Dimension(1232, 220));
 
-            // Calorie ring card
-            JPanel ringCard = new JPanel(new GridBagLayout());
+            // Calorie ring card 
+            JPanel ringCard = new JPanel(new GridBagLayout()); //GridBagLayout allows to perfectly center the ring widget in side the card
             ringCard.setBackground(Theme.BACKGROUND_DARK_CARD);
             ringCard.setBorder(BorderFactory.createLineBorder(Color.WHITE));
-            ringCard.setPreferredSize(new Dimension(210, 210));
+            ringCard.setPreferredSize(new Dimension(210, 210)); //forces the card to remain this size
             calorieRingWidget = new CalorieRing();
             calorieRingWidget.updateCalories(
                 dashboard.getTotalCalories(),
@@ -185,15 +205,16 @@ public class DashboardPanel {
             // Macro grid tiles
             JPanel macroTileGrid = new JPanel(new GridLayout(2, 3, 12, 12));
             macroTileGrid.setBackground(Color.BLACK);
-            UserProfile profile = dashboard.getProfile();
 
+            UserProfile profile = dashboard.getProfile();
+            /*2d array is used so that it move as one */
             String[][] tileDefs = {
                 {"PROTEIN", formatValue(dashboard.getTotalProtein()), formatValue(profile.getDailyProteinTargetGrams()),      "g"},
-                {"CARBS",   formatValue(dashboard.getTotalCarbs()),   formatValue(profile.getDailyCarbohydrateTargetGrams()), "g"},
-                {"FAT",     formatValue(dashboard.getTotalFat()),     formatValue(profile.getDailyFatTargetGrams()),           "g"},
-                {"FIBRE",   formatValue(dashboard.getTotalFibre()),   formatValue(profile.getDailyFibreTargetGrams()),         "g"},
-                {"SODIUM",  formatValue(dashboard.getTotalSodium()),  formatValue(profile.getDailySodiumTargetMilligrams()),  "mg"},
-                {"SUGAR",   formatValue(dashboard.getTotalSugar()),   formatValue(profile.getDailySugarTargetGrams()),         "g"},
+                {"CARBS", formatValue(dashboard.getTotalCarbs()), formatValue(profile.getDailyCarbohydrateTargetGrams()), "g"},
+                {"FAT", formatValue(dashboard.getTotalFat()), formatValue(profile.getDailyFatTargetGrams()),           "g"},
+                {"FIBRE", formatValue(dashboard.getTotalFibre()), formatValue(profile.getDailyFibreTargetGrams()),         "g"},
+                {"SODIUM", formatValue(dashboard.getTotalSodium()), formatValue(profile.getDailySodiumTargetMilligrams()),  "mg"},
+                {"SUGAR", formatValue(dashboard.getTotalSugar()), formatValue(profile.getDailySugarTargetGrams()),         "g"},
             };
 
             JLabel[][] labelPairs = new JLabel[tileDefs.length][2];
@@ -264,11 +285,11 @@ public class DashboardPanel {
         void refreshGoalLabels() {
             UserProfile profile = dashboard.getProfile();
             proteinGoalLabel.setText("/ " + formatValue(profile.getDailyProteinTargetGrams())      + "g goal");
-            carbsGoalLabel.setText(  "/ " + formatValue(profile.getDailyCarbohydrateTargetGrams()) + "g goal");
-            fatGoalLabel.setText(    "/ " + formatValue(profile.getDailyFatTargetGrams())           + "g goal");
-            fibreGoalLabel.setText(  "/ " + formatValue(profile.getDailyFibreTargetGrams())         + "g goal");
-            sodiumGoalLabel.setText( "/ " + formatValue(profile.getDailySodiumTargetMilligrams())   + "mg goal");
-            sugarGoalLabel.setText(  "/ " + formatValue(profile.getDailySugarTargetGrams())         + "g goal");
+            carbsGoalLabel.setText("/ " + formatValue(profile.getDailyCarbohydrateTargetGrams()) + "g goal");
+            fatGoalLabel.setText("/ " + formatValue(profile.getDailyFatTargetGrams())           + "g goal");
+            fibreGoalLabel.setText("/ " + formatValue(profile.getDailyFibreTargetGrams())         + "g goal");
+            sodiumGoalLabel.setText("/ " + formatValue(profile.getDailySodiumTargetMilligrams())   + "mg goal");
+            sugarGoalLabel.setText("/ " + formatValue(profile.getDailySugarTargetGrams())         + "g goal");
         }
 
         // Formats a double as a whole number or 1-decimal string.
@@ -283,16 +304,21 @@ public class DashboardPanel {
     // MEAL SECTION — four meal cards: Breakfast, Lunch, Dinner, Snacks
     static class MealSection {
         private static final String[] MEAL_NAMES = { "Breakfast", "Lunch", "Dinner", "Snacks" };
+        /*reference to the main dashboard to access global data like dates, calories*/
+        private final DashboardPanel dashboard; 
+        //A dictionary that stores the "List Panel" for each meal name. This allows you to update only one meal card at a time.
+        private final Map<String, JPanel> mealContentPanelMap = new LinkedHashMap<>(); //
+        //A dictionary that stores the "Calories Label" for each meal, allowing you to change the text dynamically when food is added/removed
+        private final Map<String, JLabel> mealCalorieLabelMap = new LinkedHashMap<>();
 
-        private final DashboardPanel         dashboard;
-        private final Map<String, JPanel>    mealContentPanelMap = new LinkedHashMap<>();
-        private final Map<String, JLabel>    mealCalorieLabelMap = new LinkedHashMap<>();
-
-        MealSection(DashboardPanel dashboard) { this.dashboard = dashboard; }
+        MealSection(DashboardPanel dashboard) {
+             this.dashboard = dashboard; 
+            }
 
         JPanel build() {
             JPanel mealGrid = new JPanel(new GridLayout(2, 2, 14, 14));
             mealGrid.setBackground(Color.BLACK);
+            //loops through array and creates ui card for each one
             for (String mealName : MEAL_NAMES) mealGrid.add(buildMealCard(mealName));
             return mealGrid;
         }
@@ -345,7 +371,8 @@ public class DashboardPanel {
 
             cardPanel.add(cardHeader,     BorderLayout.NORTH);
             cardPanel.add(foodScrollPane, BorderLayout.CENTER);
-
+            
+                // +Button
             addFoodButton.addActionListener(e ->
                 new AddFoodDialog(dashboard.getParentFrame(), mealName, dashboard.getViewingDate(),
                     addedFood -> {
@@ -395,7 +422,9 @@ public class DashboardPanel {
             contentPanel.repaint();
         }
 
-        void rebuildAll() { for (String mealName : MEAL_NAMES) rebuildMealCard(mealName); }
+        void rebuildAll() { 
+            for (String mealName : MEAL_NAMES) rebuildMealCard(mealName); 
+        }
 
         private JPanel buildFoodItemRow(Food foodEntry, String mealName, int foodIndex) {
             JPanel rowPanel = new JPanel(new BorderLayout(6, 0));
